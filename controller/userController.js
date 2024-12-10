@@ -14,6 +14,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Utility function to create JWT token
+let x=123
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET);
 };
