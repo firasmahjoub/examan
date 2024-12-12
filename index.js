@@ -1,40 +1,34 @@
 import express from "express";
 import cors from "cors";
 import { connectDb } from "./config/db.js";
-import foodRouter from "./routers/foodRouter.js";
 import userRouter from "./routers/userRouter.js";
-import 'dotenv/config.js'
-import cardRouter from "./routers/cardRouter.js";
-import authMiddleware from "./middleware/auth.js";
-// App config:
+import cartRouter from "./routers/cardRouter.js";
+import testRouter from "./routers/testRouter.js";
+import foodRouter from './routers/foodRouter.js'; 
+import dotenv from "dotenv";
 const app = express(); 
 const port = 4000;
 
-// Middleware:
+// Middleware
 app.use(express.json());
 app.use(cors());
 
-//DBconnect
+// DB Connect
 connectDb();
+dotenv.config(); // This can still be used if you want to load other environment variables
 
-//api 
+// User API Routes
+app.use("/api/user", userRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/test", testRouter);
+app.use("/api/food", foodRouter);
 
-app.use("/api/food",foodRouter);
-
-
-//bich intal3aha fil front 
-app.use("/image",express.static('uploads'))
-
-app.use("/api/user",userRouter)
-
-app.use("/api/cart",cardRouter)
-
-// Route:
+// Root Route
 app.get("/", (req, res) => {
   res.send("API WORKING");
 });
 
-// Start the server:
+// Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

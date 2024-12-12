@@ -1,33 +1,64 @@
-import userModel from "../models/userModel.js";
+// cardController.js
+import Cart from "../models/cartModel.js";
+import Food from "../models/foodModel.js";
 
-// add to panier 
+// Add item to cart
+export const addToCart = async (req, res) => {
+    try {
+        const { userId, foodId } = req.body;
 
-const addToCart = async(req,res)=>{
-    try{
-        let userData = await userModel.findOne({_id:req.body.userId}) ; 
-    let cartData = await userData.cartData;
-    if(!cartData[req.body.itemId])
-        {
-            cartData[req.body.itemId] = 1 ;
+        // Find the food item by foodId
+        const food = await Food.findById(foodId);
+        if (!food) {
+            return res.status(404).json({ success: false, message: "Food item not found." });
         }
-        else{
-            cartData[req.body.itemId]++;
-        }
-        await userModel.findByIdAndUpdate(res.body.userId,{cartData});
-        res.json({success: true ,  message:"item added to cart"})
-        
-    }catch{
-        console.log(error) ; 
-        res.json({success: false ,  message:"error "})
+
+        // Check if the food item has an image, if not provide a default
+        const foodImage = food.image || 'default_image_url'; // Default image if none exists
+
+        // Create a new cart item with the food name and image
+        const cartItem = new Cart({
+            userId,
+            foodId,
+            name: food.name,
+            image: foodImage  // Ensure the image is set
+        });
+
+        // Save the cart item to the database
+        await cartItem.save();
+        res.status(201).json({ success: true, message: "Item added to cart." });
+    } catch (error) {
+        console.error("Error in addToCart:", error);
+        res.status(500).json({ success: false, message: "An error occurred while adding to the cart." });
     }
-    
-}
+};
 
-// remove from panier 
-const removeFromCard = async(req,res)=>{}
+// Remove item from cart
+export const removeFromCart = async (req, res) => {
+    try {
+        const { userId, foodId } = req.body;
 
-// fetch user cart data 
+        const result = await Cart.findOneAndDelete({ userId, foodId });
+        if (!result) {
+            return res.status(404).json({ success: false, message: "Item not found in cart." });
+        }
 
-const getCart = async(req,res)=>{} 
+        res.json({ success: true, message: "Item removed from cart." });
+    } catch (error) {
+        console.error("Error in removeFromCart:", error);
+        res.status(500).json({ success: false, message: "An error occurred while removing from the cart." });
+    }
+};
 
-export{addToCart , removeFromCard , getCart}
+// Get cart items
+export const getCart = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const cartItems = await Cart.find({ userId }).populate("foodId", "name image");
+        res.json({ success: true, cartItems });
+    } catch (error) {
+        console.error("Error in getCart:", error);
+        res.status(500).json({ success: false, message: "An error occurred while fetching the cart." });
+    }
+};

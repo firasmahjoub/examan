@@ -3,23 +3,24 @@
 
         // add food item 
 
-        const addFood =async(req,res)=>{
+        const addFood = async (req, res) => {
             let image_filename = `${req.file.filename}`;
             const food = new foodModel({
-                name:req.body.name,
-                description:req.body.description,
-                price:req.body.price,
-                category:req.body.category,
-                Image:image_filename,
-            })
-            try{
-                await food.save() ; 
-                res.json({success:true,message:"Food addes"})
-            }catch (error) {
+                name: req.body.name,
+                description: req.body.description,
+                price: req.body.price,
+                category: req.body.category,
+                image: image_filename,  // Corrected field name here
+            });
+        
+            try {
+                await food.save();
+                res.json({ success: true, message: "Food added" });
+            } catch (error) {
                 console.log(error);  // Log the error correctly
                 res.json({ success: false, message: "Error adding food item" });
             }
-        }
+        };
 
 
 

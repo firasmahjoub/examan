@@ -1,18 +1,23 @@
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
-const authMiddleware = async (req,res,next)=>{
-    const {token} = res.headers ; 
-    if(!token){
-        return res.json({message:"Please login first."})
-    }
-    try{
-        const token_decode =jwt.verify(token,process.env.JWT_SECRET) ; 
-        req.body.userId = token_decode.id ; 
-        next() ; 
-    }catch(error){
-        console.log(error);
-        return res.json({success:false, message:"Invalid token."})
-    }
+// Hardcoded JWT Secret (same as in your controller)
+const JWT_SECRET = "your-very-secure-static-secret-key";
 
-}
-export default authMiddleware ; 
+const authMiddleware = (req, res, next) => {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+
+  if (!token) {
+    return res.status(401).json({ message: "No token, authorization denied" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // Attach the decoded user info to the request object
+    next();
+  } catch (error) {
+    console.error("JWT Verification Error:", error);
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};
+
+export default authMiddleware;
