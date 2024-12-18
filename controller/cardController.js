@@ -1,4 +1,3 @@
-// cardController.js
 import Cart from "../models/cartModel.js";
 import Food from "../models/foodModel.js";
 
@@ -7,24 +6,26 @@ export const addToCart = async (req, res) => {
     try {
         const { userId, foodId } = req.body;
 
-        // Find the food item by foodId
+        // Find the food item by ID
         const food = await Food.findById(foodId);
         if (!food) {
             return res.status(404).json({ success: false, message: "Food item not found." });
         }
 
-        // Check if the food item has an image, if not provide a default
-        const foodImage = food.image || 'default_image_url'; // Default image if none exists
+        // Use the image from the food document or default if missing
+        const foodImage = food.image || 'default_image_url';
 
-        // Create a new cart item with the food name and image
+        // Create a new cart item
         const cartItem = new Cart({
             userId,
             foodId,
             name: food.name,
-            image: foodImage  // Ensure the image is set
+            description: food.description,
+            image: foodImage,
+            price: food.price,
+
         });
 
-        // Save the cart item to the database
         await cartItem.save();
         res.status(201).json({ success: true, message: "Item added to cart." });
     } catch (error) {

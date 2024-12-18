@@ -13,11 +13,11 @@ const port = 4000;
 app.use(express.json());
 app.use(cors());
 
-// DB Connect
+// DB Connect1
 connectDb();
-dotenv.config(); // This can still be used if you want to load other environment variables
+dotenv.config(); 
 
-// User API Routes
+
 app.use("/api/user", userRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/test", testRouter);

@@ -1,22 +1,28 @@
 import jwt from "jsonwebtoken";
 
-// Hardcoded JWT Secret (same as in your controller)
-const JWT_SECRET = "your-very-secure-static-secret-key";
+const JWT_SECRET = "your-very-secure-static-secret-key"; // Consider using an environment variable for security
 
 const authMiddleware = (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
-
-  if (!token) {
-    return res.status(401).json({ message: "No token, authorization denied" });
-  }
-
   try {
+    const authHeader = req.header("Authorization");
+    if (!authHeader) {
+      return res.status(401).json({ success: false, message: "Authorization header missing" });
+    }
+
+    // Ensure token follows "Bearer <token>" format
+    if (!authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ success: false, message: "Invalid token format. Use 'Bearer <token>'" });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+
+    // Verify and decode the token
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // Attach the decoded user info to the request object
+    req.user = decoded; // Attach decoded user info (e.g., userId) to the request
     next();
   } catch (error) {
-    console.error("JWT Verification Error:", error);
-    return res.status(401).json({ message: "Invalid or expired token" });
+    console.error("JWT Verification Error:", error.message);
+    return res.status(401).json({ success: false, message: "Invalid or expired token" });
   }
 };
 
